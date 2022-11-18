@@ -1,0 +1,64 @@
+---
+title: "Bayesian_algorithm"
+author: "Pedro Valls"
+date: '2022-11-18'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Some Bayesian calculations
+
+We are going to give some examples of the Bayes' theorem using simulated data.
+Remember that Bayes' Theorem is given by 
+$ p(\theta \mid y) = \frac{\ell(y \mid \theta) \cdot p(\theta)}{p(y)}$
+where 
+$p(\theta \mid y)$ is the posterior distribution,
+$\ell(y \mid \theta)$ is the likelihood, and 
+$p(y)$ is the marginal distribution.
+
+# Simulating data for a regression
+
+First define the sample size $n$, the $\beta$ coefficient and the $\tau$ the precision which is the inverse of the variance $\sigma^{2}$. 
+
+```{r}
+n <- 50  
+beta <- 0.9 
+tau <- 1.0  
+```
+
+Now define the regressors $y=(y_{1}, \cdots, y_{n})$ as $U[10,20]$, i.e. draw $n$ uniform random number in the interval $[10,20]$.
+
+```{r}
+set.seed(123456)
+y<- runif(n,min=10,max=20)
+print(y)
+```
+
+Now define the dependent variable as drawn from a normal random variable with mean $\beta \cdot y$ and variance equal to $\frac{1}{\tau}$.
+
+```{r}
+set.seed(123456)
+consump <- rnorm(n,mean = beta*y,sd =1/sqrt(tau))
+print(consump)
+```
+
+# Plotting the likelihood
+Since the likelihood is $\ell(y \mid \beta)$ we need a range of possible values for $\beta$ that are close to the true value. 
+Let us use $\beta=[0.86, \cdots, 0.94]$ using $100$ numbers in this interval.
+Let us compute $\hat{\beta}$ the OLS estimate if $\beta$. 
+Plot the scatter plot of y $\times$ consump
+Plot the likelihood
+```{r}
+par(mfrow=c(1,2))
+betah <- sum(consump*y)/sum(y*y)
+betavalues <- seq (0.86, 0.94, length = 100)
+require(stats)
+z <- lm(consump ~ y - 1)
+plot(y, consump)
+abline(z,col="red")
+plot(betavalues, dnorm(betavalues, betah, 1/sqrt(tau*sum(y*y))),type ="l", ylab="likelihood", xlab = "beta")
+```
+
